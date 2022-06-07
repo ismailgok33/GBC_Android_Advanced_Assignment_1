@@ -11,6 +11,9 @@ public class People {
     private @SerializedName("species")
     ArrayList<String> species;
 
+    private @SerializedName("films")
+    ArrayList<String> films;
+
     public String getName() {
         return name;
     }
@@ -19,11 +22,16 @@ public class People {
         return species;
     }
 
+    public ArrayList<String> getFilms() {
+        return films;
+    }
+
     @Override
     public String toString() {
         return "People{" +
                 "name='" + name + '\'' +
                 ", species=" + species +
+                ", films=" + films +
                 '}';
     }
 }

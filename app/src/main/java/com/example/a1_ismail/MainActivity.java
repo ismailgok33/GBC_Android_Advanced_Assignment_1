@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements  AdapterView.OnIt
         Log.d(TAG, "onCharacterItemClicked: Character is clicked " + people.toString());
 
         // TODO: Call from ViewModel. VievModel should track how many times the character appears in the movies
-        Toast.makeText(this, people.getName() + " appears in 1 movie", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, people.getName() + " appears in " + people.getFilms().size() + " movie", Toast.LENGTH_LONG).show();
     }
 
     @Override
