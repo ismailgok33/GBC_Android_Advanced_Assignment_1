@@ -89,6 +89,16 @@ public class MainActivity extends AppCompatActivity implements  AdapterView.OnIt
         // attach the observer
         vm.getPeopleArrayListContainer().observe(this, peopleListObserver);
 
+        // observer
+        final Observer<Integer[]> peopleStatObserver = new Observer<Integer[]>() {
+            @Override
+            public void onChanged(Integer[] peopleStats) {
+                setPeopleStats(peopleStats);
+            }
+        };
+        // attach the observer
+        vm.getPeopleStatsContainer().observe(this, peopleStatObserver);
+
         vm.fetchMovies();
         this.spinnerAdapter.notifyDataSetChanged();
     }
@@ -111,6 +121,10 @@ public class MainActivity extends AppCompatActivity implements  AdapterView.OnIt
         Log.d(TAG, "setPeople: called..");
     }
 
+    private void setPeopleStats(Integer[] peopleStats) {
+        this.binding.tvCacheInfo.setText(getText(R.string.characters_from_cache) + ": " + peopleStats[0]);
+        this.binding.tvApiInfo.setText(getText(R.string.characters_from_api) + ": " + peopleStats[1]);
+    }
 
     @Override
     public void onCharacterItemClicked(People people) {

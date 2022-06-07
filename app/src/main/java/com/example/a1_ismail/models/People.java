@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 
 public class People {
+    private String id;
+
     private @SerializedName("name")
     String name;
 
@@ -13,6 +15,14 @@ public class People {
 
     private @SerializedName("films")
     ArrayList<String> films;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
