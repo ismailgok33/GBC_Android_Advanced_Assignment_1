@@ -17,6 +17,7 @@ import com.example.a1_ismail.models.People;
 import java.util.ArrayList;
 
 public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.PeopleViewHolder> {
+
     private final Context context;
     private final ArrayList<People> peopleArrayList;
     ItemPeopleBinding binding;
@@ -56,6 +57,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.PeopleView
         public void bind(Context context, People currentPeople, OnCharacterClickListener clickListener){
             itemBinding.tvName.setText(currentPeople.getName());
             itemBinding.tvSpecies.setText(currentPeople.getSpecies().size() > 0 ? context.getString(R.string.not_human) : context.getString(R.string.human));
+            itemBinding.tvSpecies.setTextColor(currentPeople.getSpecies().size() > 0 ? context.getColor(R.color.blue) : context.getColor(R.color.orange));
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

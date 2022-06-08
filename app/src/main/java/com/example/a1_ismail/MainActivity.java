@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements  AdapterView.OnIt
         setContentView(binding.getRoot());
 
         initView();
-        initViewModel();
+        addMovieObserver();
     }
 
     private void initView() {
@@ -64,56 +64,62 @@ public class MainActivity extends AppCompatActivity implements  AdapterView.OnIt
         this.binding.rvCharacters.setLayoutManager(new LinearLayoutManager(this));
         this.binding.rvCharacters.addItemDecoration(new DividerItemDecoration(this.getApplicationContext(), DividerItemDecoration.VERTICAL));
         this.binding.rvCharacters.setAdapter(this.peopleAdapter);
+
+        vm = new ViewModelProvider(this).get(MainActivityViewModel.class);
     }
 
-    private void initViewModel() {
-        vm = new ViewModelProvider(this).get(MainActivityViewModel.class);
+    // Add an observer to Movie Arraylist from ViewModel
+    private void addMovieObserver() {
 
-        // observer
+        // Fetch the movies before adding the observer
+        vm.fetchMovies();
+
+        // Movie List Observer
         final Observer<ArrayList<Movie>> movieListObserver = new Observer<ArrayList<Movie>>() {
             @Override
             public void onChanged(ArrayList<Movie> movies) {
-                getMovies(movies);
+                setMovies(movies);
             }
         };
         // attach the observer
         vm.getMovieArrayListContainer().observe(this, movieListObserver);
 
-        // observer
-        final Observer<ArrayList<People>> peopleListObserver = new Observer<ArrayList<People>>() {
-            @Override
-            public void onChanged(ArrayList<People> peopleArrayList) {
-                setPeople(peopleArrayList);
-            }
-        };
-        // attach the observer
-        vm.getPeopleArrayListContainer().observe(this, peopleListObserver);
-
-        // observer
-        final Observer<Integer[]> peopleStatObserver = new Observer<Integer[]>() {
-            @Override
-            public void onChanged(Integer[] peopleStats) {
-                setPeopleStats(peopleStats);
-            }
-        };
-        // attach the observer
-        vm.getPeopleStatsContainer().observe(this, peopleStatObserver);
-
-        vm.fetchMovies();
         this.spinnerAdapter.notifyDataSetChanged();
     }
 
-    private void getMovies(ArrayList<Movie> movies) {
-        // TODO: Call from ViewModel and load this.movieList via Observers
+    // Add an observer to People Arraylist from ViewModel
+    private void addPeopleObserver() {
+        if (!vm.getPeopleArrayListContainer().hasObservers()) {
+            vm.getPeopleArrayListContainer().observe(this, new Observer<ArrayList<People>>() {
+                @Override
+                public void onChanged(ArrayList<People> peopleArrayList) {
+                    setPeople(peopleArrayList);
+                }
+            });
+        }
+    }
 
+    // Add an observer to People Stats Arraylist from ViewModel
+    private void addPeopleStatsObserver() {
+        if (!vm.getPeopleStatsContainer().hasObservers()) {
+            vm.getPeopleStatsContainer().observe(this, new Observer<Integer[]>() {
+                @Override
+                public void onChanged(Integer[] peopleStats) {
+                    setPeopleStats(peopleStats);
+                }
+            });
+        }
+    }
+
+    // Set fetched movies to the UI elements
+    private void setMovies(ArrayList<Movie> movies) {
         this.movieTitleArrayList.addAll(movies.stream().map(Movie::getTitle).collect(Collectors.toList()));
         this.movieArrayList = new ArrayList<>();
         this.movieArrayList.addAll(movies);
-//        this.movieList.add(0, getString(R.string.select_a_movie));
-
         this.spinnerAdapter.notifyDataSetChanged();
     }
 
+    // Set fetched people (characters) to the UI elements
     private void setPeople(ArrayList<People> peopleArrayList) {
         this.peopleArrayList.clear();
         this.peopleArrayList.addAll(peopleArrayList);
@@ -121,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements  AdapterView.OnIt
         Log.d(TAG, "setPeople: called..");
     }
 
+    // Set people (characters) stats to the UI elements
     private void setPeopleStats(Integer[] peopleStats) {
         this.binding.tvCacheInfo.setText(getText(R.string.characters_from_cache) + ": " + peopleStats[0]);
         this.binding.tvApiInfo.setText(getText(R.string.characters_from_api) + ": " + peopleStats[1]);
@@ -128,36 +135,41 @@ public class MainActivity extends AppCompatActivity implements  AdapterView.OnIt
 
     @Override
     public void onCharacterItemClicked(People people) {
-        Log.d(TAG, "onCharacterItemClicked: Character is clicked " + people.toString());
-
-        // TODO: Call from ViewModel. VievModel should track how many times the character appears in the movies
         Toast.makeText(this, people.getName() + " appears in " + people.getFilms().size() + " movie", Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.d(TAG, "onItemClick: Selected movie : " + this.movieTitleArrayList.get(i));
 
         this.peopleArrayList.clear();
+
+        // If user selected "Select a movie" clear the stats
         if (i == 0) {
-            // TODO: remove recycler view
+            this.binding.tvCacheInfo.setText(getText(R.string.characters_from_cache) + ": 0");
+            this.binding.tvApiInfo.setText(getText(R.string.characters_from_api) + ": 0");
         }
         else {
-            // TODO: Load recycler view with the specific data
+            // Split the ID from People url and send it to the ViewModel to fetch the People (Characters)
             int moviePosition = i - 1;
             Movie movie = this.movieArrayList.get(moviePosition);
-            ArrayList<String> peopleIDList = (ArrayList<String>) movie.getCharacterIDList().stream().map(url -> url.substring(url.substring(0, url.length() - 2).lastIndexOf("/") + 1, url.length() - 1)).collect(Collectors.toList());
-            for (String item : peopleIDList) {
-                Log.d(TAG, "onItemSelected: peopleIDList item = " + item);
-            }
+            ArrayList<String> peopleIDList = (ArrayList<String>) movie.getCharacterIDList()
+                    .stream()
+                    .map(url -> url.substring(url.substring(0, url.length() - 2).lastIndexOf("/") + 1, url.length() - 1))
+                    .collect(Collectors.toList());
             vm.fetchPeople(peopleIDList);
+
+            // add People Observer and Stats Observer when a movie is selected
+            addPeopleObserver();
+            addPeopleStatsObserver();
+
         }
 
+        // display the changes on People (Character) Adapter (both People Stats and the Recycler view)
         this.peopleAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-
+        // do nothing
     }
 }

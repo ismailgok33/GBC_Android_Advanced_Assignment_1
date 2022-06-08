@@ -15,7 +15,7 @@ public interface API {
     @GET("./films")
     Call<MovieContainer> fetchMovies();
 
-    // https://swapi.dev/api/films
+    // https://swapi.dev/api/people/{id}
     @GET("people/{id}")
     Call<People> fetchCharacters(@Path("id") String id);
 }

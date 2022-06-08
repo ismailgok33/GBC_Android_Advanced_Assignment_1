@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">A1-Ismail</string>
+
     <string name="characters_from_cache">Characters from cache: </string>
     <string name="characters_from_api">Characters from API: </string>
+
     <string name="not_human">Not Human</string>
     <string name="human">Human</string>
+
     <string name="select_a_movie">Select a movie</string>
 </resources>

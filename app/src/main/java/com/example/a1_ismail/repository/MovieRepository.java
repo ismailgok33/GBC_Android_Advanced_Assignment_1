@@ -20,10 +20,9 @@ public class MovieRepository {
     private static final String TAG = "MovieRepository";
 
     private MutableLiveData<ArrayList<Movie>> movieArrayListContainer = new MutableLiveData<>();
+    private ArrayList<Movie> movieArrayList = new ArrayList<>();
 
     public void fetchMovies() {
-
-        ArrayList<Movie> movieArrayList = new ArrayList<>();
 
         Call<MovieContainer> movieContainerCall = RetrofitClient.getInstance().getApi().fetchMovies();
 
@@ -33,22 +32,24 @@ public class MovieRepository {
                 public void onResponse(Call<MovieContainer> call, Response<MovieContainer> response) {
                     if (response.code() == 200) {
                         MovieContainer movieContainer = response.body();
-                        
+
                         if (movieContainer.getMovieList().isEmpty()) {
                             Log.e(TAG, "onResponse: No movies are fetched");
                         }
                         else {
-                            for (Movie movie : movieContainer.getMovieList()) {
-                                movieArrayList.add(movie);
-                            }
-                            movieArrayListContainer.setValue(movieArrayList);
+                            movieArrayList.addAll(movieContainer.getMovieList());
+                            movieArrayListContainer.postValue(movieArrayList);
                         }
+                    }
+                    else {
+                        Log.e(TAG, "onResponse: Movie call response returned error code = " + response.code());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<MovieContainer> call, Throwable t) {
-
+                    Log.e(TAG, "onFailure: movie call failed: " + t.getMessage());
+//                    call.cancel();
                 }
             });
         }
@@ -56,6 +57,10 @@ public class MovieRepository {
             Log.e(TAG, "fetchMovies: Cannot fetch the movie data" + e.getLocalizedMessage());
         }
 
+    }
+
+    public ArrayList<Movie> getMovieArrayList() {
+        return movieArrayList;
     }
 
     public MutableLiveData<ArrayList<Movie>> getMovieArrayListContainer() {
